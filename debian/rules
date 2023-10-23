@@ -1,4 +1,90 @@
 #!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+export SHELL = /bin/bash
+
+DOCDIR:=$(CURDIR)/debian/python-gevent-doc/usr/share/doc/python-gevent-doc
+
+export GEVENTSETUP_EMBED_CARES = 0
+export GEVENTSETUP_EMBED_LIBEV = 0
+export GEVENTSETUP_EMBED_LIBUV = 0
 
 %:
-	dh $@
+	dh  $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_build:
+	dh_auto_build
+	PYTHONPATH=../src/ make --directory docs/ html SPHINXBUILD=/usr/share/sphinx/scripts/python3/sphinx-build
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f $(CURDIR)/deps/c-ares/Makefile \
+		$(CURDIR)/deps/c-ares/ares_build.h \
+		$(CURDIR)/deps/c-ares/ares_config.h \
+		$(CURDIR)/deps/c-ares/libcares.pc \
+		$(CURDIR)/deps/c-ares/stamp-h1 \
+		$(CURDIR)/deps/c-ares/stamp-h2
+	rm -f $(CURDIR)/deps/libev/Makefile \
+		$(CURDIR)/deps/libev/libtool \
+		$(CURDIR)/deps/libev/stamp-h1
+	rm -f $(CURDIR)/src/gevent/_abstract_linkable.c \
+		$(CURDIR)/src/gevent/_greenlet_primitives.c \
+	       	$(CURDIR)/src/gevent/_hub_local.c \
+		$(CURDIR)/src/gevent/_hub_primitives.c \
+		$(CURDIR)/src/gevent/_ident.c \
+		$(CURDIR)/src/gevent/_imap.c \
+		$(CURDIR)/src/gevent/_tracer.c \
+		$(CURDIR)/src/gevent/_waiter.c \
+		$(CURDIR)/src/gevent/event.c \
+		$(CURDIR)/src/gevent/greenlet.c \
+		$(CURDIR)/src/gevent/queue.c
+	rm -rf $(CURDIR)/src/gevent.egg-info/
+	rm -f $(CURDIR)/src/gevent/*.html \
+		$(CURDIR)/src/gevent/libev/corecext.html \
+		$(CURDIR)/src/gevent/resolver/cares.html
+
+override_dh_install:
+	dh_install -O--parallel -O--buildsystem=pybuild
+	: # remove the compat stuff for 2/3
+	rm -v -f debian/python3-gevent/usr/lib/python3*/dist-packages/gevent/_{util_py,ssl,fileobject,socket}2*
+	# remove debug files from main package
+	find debian/python3-gevent -name '*.cpython-3?d*-*.so'| xargs -r rm -f
+
+override_dh_compress:
+	dh_compress -X.js -X_static/* -X _sources/* -X_sources/*/* -X.inv
+
+override_dh_strip:
+	dh_strip -p python3-gevent --dbgsym-migration='python3-gevent-dbg (<< 20.9.0-2~)'
+
+override_dh_auto_test:
+	# dont fail (for now), until https://github.com/gevent/gevent/issues/1833 is addressed
+	-http_proxy= https_proxy= PYBUILD_SYSTEM=custom PYBUILD_TEST_ARGS="PYTHONPATH={build_dir} {interpreter} -m gevent.tests -u-network --verbose --debug" dh_auto_test
+
+override_dh_installdocs-indep:
+	dh_installdocs -i
+	# remove privacy tracking links
+	sed -i 's|https://www.paypal.com/.*.gif||' \
+		$(DOCDIR)/html/sfc.html
+	sed -i 's|"https://travis-ci.org/.*"|""|' \
+		$(DOCDIR)/html/install.html
+	sed -i 's|"https://coveralls.io/.*"|""|' \
+		$(DOCDIR)/html/install.html
+	sed -i 's|"https://ci.appveyor.com/.*"|""|' \
+		$(DOCDIR)/html/install.html
+
+override_dh_installexamples-indep:
+	dh_installexamples -i
+	# remove privacy tracking links
+	sed -i 's|http.*/jquery.min.js|file://usr/share/javascript/jquery/jquery.min.js|' \
+		$(DOCDIR)/examples/webchat/templates/index.html
+
+override_dh_missing:
+	dh_missing --list-missing -X.c -X.h -X.pxd -X.pyc -X.pyx
+
+.PHONY: override_dh_auto_build override_dh_auto_clean override_dh_install \
+	override_dh_compress override_dh_strip override_dh_auto_test \
+	override_dh_installdocs-indep \
+	override_dh_installexamples-indep override_dh_missing

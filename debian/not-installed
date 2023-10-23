@@ -1,0 +1,4 @@
+usr/lib/python*/dist-packages/gevent/libev/_corecffi.abi3.so
+usr/lib/python*/dist-packages/gevent/libuv/_corecffi.abi3.so
+usr/lib/python*/dist-packages/gevent/testing/
+usr/lib/python*/dist-packages/gevent/tests/

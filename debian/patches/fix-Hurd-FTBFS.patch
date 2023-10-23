@@ -1,0 +1,20 @@
+Description: define PATH_MAX if needed
+ Fix FTBFS for Hurd/i386.
+Author: Laszlo Boszormenyi (GCS) <gcs@debian.org>
+Last-Update: 2018-07-22
+
+---
+
+--- a/deps/libuv/src/unix/internal.h
++++ b/deps/libuv/src/unix/internal.h
+@@ -33,6 +33,10 @@
+ #include <errno.h>
+ #include <sys/socket.h>
+ 
++#ifndef PATH_MAX
++#define PATH_MAX 4096
++#endif
++
+ #if defined(__STRICT_ANSI__)
+ # define inline __inline
+ #endif
