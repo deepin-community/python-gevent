@@ -1,5 +1,404 @@
-template-repository (1.0-1) unstable; urgency=medium
+python-gevent (22.10.2-3) unstable; urgency=medium
 
-  * Initial release
+  * Team upload.
+  * Switch to libpython3.11-testsuite
 
- -- Tsic404 <liuheng@deepin.org>  Sat, 28 Jan 2023 13:46:49 +0800
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sun, 05 Feb 2023 11:01:41 +0100
+
+python-gevent (22.10.2-2) unstable; urgency=medium
+
+  * Team upload.
+  * Add Depends on python3-greenlet >= 2.0.0 (Closes: #1024595)
+
+ -- Scott Talbert <swt@techie.net>  Tue, 06 Dec 2022 10:38:38 -0500
+
+python-gevent (22.10.2-1) unstable; urgency=low
+
+  * New upstream release.
+    + Fixes compatibility with Python 3.11. Closes: #1024015
+
+ -- Jelmer Vernooĳ <jelmer@debian.org>  Mon, 21 Nov 2022 11:52:25 +0000
+
+python-gevent (21.12.0-3) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Set upstream metadata fields: Bug-Database, Bug-Submit, Repository-Browse.
+  * Remove field Section on binary package python3-gevent that duplicates
+    source.
+
+ -- Jelmer Vernooĳ <jelmer@debian.org>  Fri, 28 Oct 2022 19:24:35 +0100
+
+python-gevent (21.12.0-2) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Remove constraints unnecessary since buster:
+    + Build-Depends: Drop versioned constraint on libevent-dev and
+      python3-greenlet.
+
+ -- Jelmer Vernooĳ <jelmer@debian.org>  Mon, 17 Oct 2022 03:12:46 +0100
+
+python-gevent (21.12.0-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream release
+  * Drop build-dependency on libpython3.9-testsuite (Closes: #1011951)
+  * Add d/patches/fix-error-running_tests-docs.patch to fix an error when
+    building running_tests.html. The command fails and results in a error
+    being included in the HTML. Additionally, fixing this makes the build
+    reproducible.
+  * Set Standards-Version to 4.6.1 (no changes)
+
+ -- Emanuele Rocca <ema@debian.org>  Wed, 31 Aug 2022 11:08:16 +0200
+
+python-gevent (21.8.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * debian/watch
+    - track github tags not releases
+  * debian/copyright
+    - convert to DEP-5
+    - update to new upstream release
+  * debian/patches
+    - refresh, drop patches merged upstream
+  * run tests at build time, but ignore failures (for now)
+
+ -- Sandro Tosi <morph@debian.org>  Mon, 22 Nov 2021 02:02:15 -0500
+
+python-gevent (20.9.0-4) unstable; urgency=medium
+
+  * Bring under DPT maintenance, with Laszlo's blessing (see #995934)
+  * debian/control
+    - run wrap-and-sort
+  * debian/copyright
+    - add a copyright notice under my name
+  * debian/gbp.conf
+    - remove gbp.conf
+
+ -- Sandro Tosi <morph@debian.org>  Sun, 10 Oct 2021 16:34:10 -0400
+
+python-gevent (20.9.0-3) unstable; urgency=medium
+
+  [ Michael R. Crusoe <crusoe@debian.org> ]
+  * Fix upstream GitHub archive links
+  * No longer manually build a -dbg package. Closes: #995138, #994354
+  * debian/patches/drop_mysphinxext: cherry-picked from upstream, fixes a
+    FTBFS.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Fri, 08 Oct 2021 20:17:15 +0200
+
+python-gevent (20.9.0-2) unstable; urgency=medium
+
+  * Fix dh_installdocs invocation in arch target (closes: #983825).
+  * Fix documentation reference.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Tue, 02 Mar 2021 06:55:02 +0100
+
+python-gevent (20.9.0-1) unstable; urgency=medium
+
+  * Update packaging bits.
+  * Update debhelper level to 13 .
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Tue, 05 Jan 2021 20:03:08 +0100
+
+python-gevent (20.9.0-0.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * New upstream version. Closes: #958476.
+
+ -- Matthias Klose <doko@debian.org>  Fri, 04 Dec 2020 14:23:52 +0100
+
+python-gevent (1.4.0-1.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Drop python2 support; Closes: #937784
+  * Install documentation in python-gevent-doc dir; Closes: #953956
+
+ -- Sandro Tosi <morph@debian.org>  Fri, 10 Apr 2020 20:03:00 -0400
+
+python-gevent (1.4.0-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Build documentation using python3-sphinx
+
+ -- Sandro Tosi <morph@debian.org>  Sat, 14 Mar 2020 18:47:23 -0400
+
+python-gevent (1.4.0-1) unstable; urgency=medium
+
+  * New upstream release.
+
+  [ Matthias Klose <doko@ubuntu.com> ]
+  * Fix installation of Python 3.8 extensions (closes: #943363).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sun, 27 Oct 2019 07:45:10 +0000
+
+python-gevent (1.3.7-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sat, 24 Nov 2018 15:48:01 +0000
+
+python-gevent (1.3.6-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Install all c-ares files for Python 3 (closes: #908144).
+  * Put back python{,3}-greenlet-dbg dependencies for recent greenlet.
+  * Update Standards-Version to 4.2.1 .
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Mon, 17 Sep 2018 22:08:48 +0000
+
+python-gevent (1.3.5-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Fix Hurd PATH_MAX FTBFS.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sun, 22 Jul 2018 13:55:09 +0000
+
+python-gevent (1.3.4-1) unstable; urgency=medium
+
+  * New upstream release:
+    - fixes Sphinx FTBFS (closes: #889140),
+    - works with Python 3.7 (closes: #903145).
+  * Remove outdated patches.
+  * Remove outdated python{,3}-greenlet-dbg dependencies (closes: #901800).
+  * Add python{,3}-cffi{,-backend-dbg} to build dependency for CFFI build.
+  * Add python3-repoze.sphinx.autointerface to build dependency for
+    documentation.
+  * Install all files.
+  * Update clean target.
+  * Update privacy link removals.
+  * Remove JavaScript symlinks, no longer needed.
+  * Update debhelper level to 11:
+    - remove autotools-dev build dependency,
+    - don't specify parallel to debhelper,
+    - update documentation directory,
+    - use dh_missing for listing not installed files.
+  * Update Standards-Version to 4.1.5 .
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sat, 07 Jul 2018 17:23:32 +0000
+
+python-gevent (1.2.2-2) unstable; urgency=medium
+
+  * Install libev submodule (closes: #876814).
+  * Update packaging.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Tue, 26 Sep 2017 15:38:16 +0000
+
+python-gevent (1.2.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Add python-setuptools and cython Python variants to build depends.
+  * Add cython-dbg to build depends to prevent FTBFS.
+  * Add python3-sphinx build dependency.
+  * Make package priority optional to match override.
+  * Update Standards-Version to 4.1.0 .
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sun, 24 Sep 2017 14:29:25 +0000
+
+python-gevent (1.1.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Remove more Twitter privacy breaches from documentation.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sat, 26 Nov 2016 21:00:12 +0000
+
+python-gevent (1.1.1-2) unstable; urgency=low
+
+  * Fix FTBFS with Sphinx 1.4+ (closes: #829414).
+  * Add libev and c-ares devel packages to build depends.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sat, 16 Jul 2016 06:44:47 +0000
+
+python-gevent (1.1.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Update Standards-Version to 3.9.8 .
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Wed, 27 Apr 2016 17:25:28 +0000
+
+python-gevent (1.1.0-2) unstable; urgency=low
+
+  * Only alter documentation when it's built (closes: #817274).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Wed, 09 Mar 2016 18:42:57 +0100
+
+python-gevent (1.1.0-1) unstable; urgency=low
+
+  * New upstream release (closes: #816972).
+  * Build Python 3 packages (closes: #661510, #793809).
+  * Remove patches that no longer needed.
+  * Keep rebuildable.
+  * Use X-Python-Version instead of pyversions.
+  * Update Standards-Version to 3.9.7 .
+  * Sync with Ubuntu.
+
+  [ Matthias Klose <doko@ubuntu.com> ]
+  * Remove the python3 compat files in python-gevent.
+  * Remove the python2 compat files in python3-gevent.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Tue, 08 Mar 2016 14:54:39 +0100
+
+python-gevent (1.0.1-2) unstable; urgency=medium
+
+  * Add dh-python to Build-Depends.
+
+  [ Jan Gerber <j@mailb.org> ]
+  * Use PROTOCOL_SSLv23 instead of PROTOCOL_SSLv3 (closes: #770616).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sat, 13 Dec 2014 05:54:50 +0000
+
+python-gevent (1.0.1-1) unstable; urgency=low
+
+  * New upstream release, fixes thread switch detection (closes: #694750).
+  * Fix sphinx build problem (closes: #700731).
+  * Tighten greenlet dependency (closes: #747283).
+  * Update Standards-Version to 3.9.6 .
+  * Sync with Ubuntu.
+
+  [ Matthias Klose <doko@ubuntu.com> ]
+  * Fix build failure with python2.7 and PEP 466 (closes: #764499).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Wed, 08 Oct 2014 16:20:29 +0000
+
+python-gevent (1.0-2) unstable; urgency=low
+
+  * Sync with Ubuntu, thanks to Sebastian Ramacher for the heads-up.
+
+  [ Matthias Klose <doko@ubuntu.com> ]
+  * Fix build failure on arm64 (closes: #738750).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sat, 26 Apr 2014 17:58:50 +0200
+
+python-gevent (1.0-1) unstable; urgency=low
+
+  * New upstream release (closes: #733600).
+  * Update Standards-Version to 3.9.5 .
+
+  [ Bart Martens <bartm@debian.org> ]
+  * Update watch file.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Sat, 01 Feb 2014 20:58:30 +0100
+
+python-gevent (0.13.7-4) unstable; urgency=low
+
+  * Last bits of -dbg package fix (closes: #703611).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sun, 24 Mar 2013 01:18:51 +0100
+
+python-gevent (0.13.7-3) unstable; urgency=low
+
+  * Build standard documentation.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Fri, 22 Mar 2013 17:05:07 +0100
+
+python-gevent (0.13.7-2) unstable; urgency=low
+
+  * Fix -dbg package (closes: #703611).
+  * Use offline intersphinx inventory instead of download it.
+  * Remove unneeded python-support from build dependencies (closes: #703625).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Fri, 22 Mar 2013 09:34:15 +0000
+
+python-gevent (0.13.7-1) unstable; urgency=low
+
+  * New upstream release.
+  * New maintainer.
+  * Fix all packaging problems (closes: #703187, #703368).
+  * Switch to dh_python2 (closes: #654272).
+  * Update Standards-Version to 3.9.4 .
+
+  [ Bart Martens <bartm@debian.org> ]
+  * Update debian/watch .
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu, 21 Mar 2013 00:39:38 +0100
+
+python-gevent (0.13.6-1+nmu2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * debian/control:
+    - Add python-all-dbg to Build-Depends to build extensions modules for
+      debug variants too. (Closes: #661342)
+    - Add ${python:Depends}, ${shlibs:Depends}, python-greenlet-dbg to
+      python-gevent-dbg's Depends.
+  * debian/rules: Install debugging symbols into the correct location so that
+    they are actually usable.
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 03 Mar 2013 15:46:09 +0100
+
+python-gevent (0.13.6-1+nmu1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix IPV6 DNS handling (closes: #690851)
+    - Patch thanks to Mike Gabriel.
+
+ -- Michael Gilbert <mgilbert@debian.org>  Mon, 12 Nov 2012 22:07:15 +0000
+
+python-gevent (0.13.6-1) unstable; urgency=low
+
+  * New upstream version (Closes: #601863).
+
+ -- Örjan Persson <orange@fobie.net>  Tue, 17 May 2011 16:43:20 +0200
+
+python-gevent (0.13.0-2) unstable; urgency=low
+
+  * Include changes from squeeze version (0.12.2-7).
+
+ -- Örjan Persson <orange@fobie.net>  Fri, 10 Sep 2010 09:59:05 +0200
+
+python-gevent (0.13.0-1) unstable; urgency=low
+
+  * New upstream version (Closes: #589268).
+  * Removed cython dependency.
+  * Updated doc package and depends on libjs-jquery.
+  * Added support for sphinx 1.0b1 (Closes: #588628).
+
+ -- Örjan Persson <orange@fobie.net>  Thu, 22 Jul 2010 12:09:58 +0200
+
+python-gevent (0.12.2-7) unstable; urgency=low
+
+  * Fixed a build problem with sphinx generation when no internet connection
+    where available. Thanks to Jakub Wilk for reporting the problem and
+    John Sullivan for patch (Closes: #584380).
+  * Fixed documentation reference problems. Thanks to John Sullivan for patch.
+
+ -- Örjan Persson <orange@fobie.net>  Mon, 06 Sep 2010 20:39:02 +0200
+
+python-gevent (0.12.2-6) unstable; urgency=low
+
+  * Added missing set_exc_info function. Thanks to Chris Lamb for the
+    bug report (Closes: #585977).
+  * Cython is now used to re-generate the core files. Needed due to the
+    exc_info-leak patch.
+
+ -- Örjan Persson <orange@fobie.net>  Wed, 16 Jun 2010 09:14:51 +0200
+
+python-gevent (0.12.2-5) unstable; urgency=low
+
+  * Added 002-exc_info-leak patch to workaround a problem where exceptions in
+    greenlets under some circumstanes would leak.
+
+ -- Örjan Persson <orange@fobie.net>  Sun, 06 Jun 2010 14:49:27 +0200
+
+python-gevent (0.12.2-4) unstable; urgency=low
+
+  * Moved python-sphinx to build-depends instead of indep.
+
+ -- Örjan Persson <orange@fobie.net>  Mon, 31 May 2010 21:13:54 +0200
+
+python-gevent (0.12.2-3) unstable; urgency=low
+
+  * Updated copyright information.
+
+ -- Örjan Persson <orange@fobie.net>  Tue, 20 Apr 2010 19:57:18 +0200
+
+python-gevent (0.12.2-2) unstable; urgency=low
+
+  * Added optional dependency for python-codespeak-lib instead of
+    the newer python-greenlet.
+
+ -- Örjan Persson <orange@fobie.net>  Tue, 06 Apr 2010 23:31:33 +0200
+
+python-gevent (0.12.2-1) unstable; urgency=low
+
+  * Initial release (Closes: #576437).
+
+ -- Örjan Persson <orange@fobie.net>  Sun, 04 Apr 2010 18:47:51 +0200

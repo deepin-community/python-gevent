@@ -1,0 +1,21 @@
+Description: do not run python -mgevent.tests --help
+ The command fails and results in a error message in the generated HTML.
+ Additionally, it's a cause for unreproducible builds.
+Author: Emanuele Rocca <ema@debian.org>
+Last-Update: 2022-08-31
+Index: python-gevent/docs/development/running_tests.rst
+===================================================================
+--- python-gevent.orig/docs/development/running_tests.rst
++++ python-gevent/docs/development/running_tests.rst
+@@ -29,11 +29,6 @@ care of other gevent-specific quirks.
+    remove this module. Notably, on Debian, you will probably need
+    ``libpythonX.Y-testsuite`` installed to run all the tests.
+ 
+-
+-The test runner has a number of options:
+-
+-.. command-output:: python -mgevent.tests --help
+-
+ The simplest way to run all the tests is just to invoke the test
+ runner, typically from the root of the source checkout::
+ 

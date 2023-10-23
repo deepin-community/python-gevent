@@ -1,0 +1,3 @@
+use-local-intersphinx-inventory.patch
+fix-Hurd-FTBFS.patch
+fix-error-running_tests-docs.patch
