@@ -1,3 +1,27 @@
+python-gevent (24.2.1-0.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * New upstream version, covering Python versions 3.11.8 and 3.12.2.
+
+ -- Matthias Klose <doko@debian.org>  Fri, 29 Mar 2024 15:11:15 +0100
+
+python-gevent (23.9.1-1) unstable; urgency=medium
+
+  * remove myself
+  * debian/patches/use-local-intersphinx-inventory.patch
+    - refresh
+
+ -- Sandro Tosi <morph@debian.org>  Wed, 28 Feb 2024 02:44:43 -0500
+
+python-gevent (23.9.1-0.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * New upstream version.
+    - Fixes build with recent sphinx version. Closes: #1042595.
+  * Build-depend on furo.
+
+ -- Matthias Klose <doko@debian.org>  Fri, 08 Dec 2023 19:46:49 +0100
+
 python-gevent (22.10.2-3) unstable; urgency=medium
 
   * Team upload.

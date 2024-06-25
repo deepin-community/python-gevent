@@ -6,6 +6,184 @@
 
 .. towncrier release notes start
 
+24.2.1 (2024-02-14)
+===================
+
+
+Bugfixes
+--------
+
+- Add support for Python patch releases 3.11.8 and 3.12.2, which changed
+  internal details of threading.
+
+  As a result of these changes, note that it is no longer possible to
+  change the ``__class__`` of a ``gevent.threading._DummyThread``
+  object on those versions.
+
+  See :issue:`2020`.
+
+Other
+-----
+
+Other updates for compatibility with the standard library include:
+
+  - Errors raised from ``subprocess.Popen`` may not have a filename set.
+  - ``SSLSocket.recv_into`` and ``SSLSocket.read`` no longer require the
+    buffer to implement ``len`` and now work with buffers whose size is
+    not 1.
+  - gh-108310: Fix CVE-2023-40217: Check for & avoid the ssl pre-close
+    flaw.
+
+In addition:
+
+  - Drop ``setuptools`` to a soft test dependency.
+  - Drop support for very old versions of CFFI.
+  - Update bundled c-ares from 1.19.1 to 1.26.0.
+  - Locks created by gevent, but acquired from multiple different
+    threads (not recommended), no longer spin to implement timeouts
+    and interruptible blocking. Instead, they use the native
+    functionality of the Python 3 lock. This may improve some scenarios.
+    See :issue:`2013`.
+
+
+
+23.9.1 (2023-09-12)
+===================
+
+
+Bugfixes
+--------
+
+- Require greenlet 3.0 on Python 3.11 and Python 3.12; greenlet 3.0 is
+  recommended for all platforms. This fixes a number of obscure crashes
+  on all versions of Python, as well as fixing a fairly common problem
+  on Python 3.11+ that could manifest as either a crash or as a
+  ``SystemError``.
+  See :issue:`1985`.
+
+
+----
+
+
+23.9.0.post1 (2023-09-02)
+=========================
+
+- Fix Windows wheel builds.
+- Fix macOS wheel builds.
+
+23.9.0 (2023-09-01)
+===================
+
+
+Bugfixes
+--------
+
+- Make ``gevent.select.select`` accept arbitrary iterables, not just
+  sequences. That is, you can now pass in a generator of file
+  descriptors instead of a realized list. Internally, arbitrary
+  iterables are copied into lists. This better matches what the standard
+  library does. Thanks to David Salvisberg.
+  See :issue:`1979`.
+- On Python 3.11 and newer, opt out of Cython's fast exception
+  manipulation, which *may* be causing problems in certain circumstances
+  when combined with greenlets.
+
+  On all versions of Python, adjust some error handling in the default
+  C-based loop. This fixes several assertion failures on debug versions
+  of CPython. Hopefully it has a positive impact under real conditions.
+  See :issue:`1985`.
+- Make ``gevent.pywsgi`` comply more closely with the HTTP specification
+  for chunked transfer encoding. In particular, we are much stricter
+  about trailers, and trailers that are invalid (too long or featuring
+  disallowed characters) forcibly close the connection to the client
+  *after* the results have been sent.
+
+  Trailers otherwise continue to be ignored and are not available to the
+  WSGI application.
+
+  Previously, carefully crafted invalid trailers in chunked requests on
+  keep-alive connections might appear as two requests to
+  ``gevent.pywsgi``. Because this was handled exactly as a normal
+  keep-alive connection with two requests, the WSGI application should
+  handle it normally. However, if you were counting on some upstream
+  server to filter incoming requests based on paths or header fields,
+  and the upstream server simply passed trailers through without
+  validating them, then this embedded second request would bypass those
+  checks. (If the upstream server validated that the trailers meet the
+  HTTP specification, this could not occur, because characters that are
+  required in an HTTP request, like a space, are not allowed in
+  trailers.) CVE-2023-41419 was reserved for this.
+
+  Our thanks to the original reporters, Keran Mu
+  (mkr22@mails.tsinghua.edu.cn) and Jianjun Chen
+  (jianjun@tsinghua.edu.cn), from Tsinghua University and Zhongguancun
+  Laboratory.
+  See :issue:`1989`.
+
+
+----
+
+
+23.7.0 (2023-07-11)
+===================
+
+
+Features
+--------
+
+- Add preliminary support for Python 3.12, using greenlet 3.0a1. This
+  is somewhat tricky to build from source at this time, and there is
+  one known issue: On Python 3.12b3, dumping tracebacks of greenlets
+  is not available.
+  :issue:`1969`.
+- Update the bundled c-ares version to 1.19.1.
+  See :issue:`1947`.
+
+
+Bugfixes
+--------
+
+- Fix an edge case connecting a non-blocking ``SSLSocket`` that could result
+  in an AttributeError. In a change to match the standard library,
+  calling ``sock.connect_ex()`` on a subclass of ``socket`` no longer
+  calls the subclass's ``connect`` method.
+
+  Initial fix by Priyankar Jain.
+  See :issue:`1932`.
+- Make gevent's ``FileObjectThread`` (mostly used on Windows) implement
+  ``readinto`` cooperatively. PR by Kirill Smelkov.
+  See :issue:`1948`.
+- Work around an ``AttributeError`` during cyclic garbage collection
+  when Python finalizers (``__del__`` and the like) attempt to use
+  gevent APIs. This is not a recommended practice, and it is unclear if
+  catching this ``AttributeError`` will fix any problems or just shift
+  them. (If we could determine the root situation that results in this
+  cycle, we might be able to solve it.)
+  See :issue:`1961`.
+
+
+Deprecations and Removals
+-------------------------
+
+- Remove support for obsolete Python versions. This is everything prior
+  to 3.8.
+
+  Related changes include:
+
+  - Stop using ``pkg_resources`` to find entry points (plugins).
+    Instead, use ``importlib.metadata``.
+  - Honor ``sys.unraisablehook`` when a callback function produces an
+    exception, and handling the exception in the hub *also* produces an
+    exception. In older versions, these would be simply printed.
+  - ``setup.py`` no longer includes the ``setup_requires`` keyword.
+    Installation with a tool that understands ``pyproject.toml`` is
+    recommended.
+  - The bundled tblib has been updated to version 2.0.
+
+
+----
+
+
 22.10.2 (2022-10-31)
 ====================
 

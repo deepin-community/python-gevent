@@ -151,7 +151,7 @@ class TestTimeout(gevent.Timeout):
         gevent.Timeout.__init__(
             self,
             timeout,
-            '%r: test timed out\n' % (method,),
+            '%r: test timed out (set class __timeout__ to increase)\n' % (method,),
             ref=False
         )
 
@@ -295,6 +295,24 @@ class TestCase(TestCaseMetaClass("NewBase",
             hub.loop.update_now()
         self.close_on_teardown = []
         self.addCleanup(self._tearDownCloseOnTearDown)
+
+    def _callTestMethod(self, method):
+        # 3.12 started raising a stupid warning about returning
+        # non-None from ``test_...()`` being deprecated. Since the
+        # test framework never cares about the return value anyway,
+        # this is an utterly pointless annoyance. Override the method
+        # that raises that deprecation. (Are the maintainers planning
+        # to make the return value _mean_ something someday? That's
+        # the only valid reason for them to do this. Answer: No, no
+        # they're not. They're just trying to protect people from
+        # writing broken tests that accidentally turn into generators
+        # or something. Which...if people don't notice their tests
+        # aren't working...well. Now, perhaps this got worse in the
+        # era of asyncio where *everything* is a generator. But that's
+        # not our problem; we have better ways of dealing with the
+        # shortcomings of asyncio, namely, don't use it.
+        # https://bugs.python.org/issue41322)
+        method()
 
     def tearDown(self):
         if getattr(self, 'skipTearDown', False):
@@ -452,9 +470,6 @@ class TestCase(TestCaseMetaClass("NewBase",
             self.assertEqual(a, b)
         except AssertionError:
             flaky.reraiseFlakyTestRaceCondition()
-
-    assertRaisesRegex = getattr(BaseTestCase, 'assertRaisesRegex',
-                                getattr(BaseTestCase, 'assertRaisesRegexp'))
 
     def assertStartsWith(self, it, has_prefix):
         self.assertTrue(it.startswith(has_prefix), (it, has_prefix))

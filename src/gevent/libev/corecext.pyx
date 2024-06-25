@@ -30,11 +30,20 @@ from cpython.ref cimport Py_INCREF
 from cpython.ref cimport Py_DECREF
 from cpython.mem cimport PyMem_Malloc
 from cpython.mem cimport PyMem_Free
+from cpython.object cimport PyObject
+from cpython.exc cimport PyErr_NormalizeException
+from cpython.exc cimport PyErr_WriteUnraisable
 from libc.errno cimport errno
+from cpython cimport PyErr_Fetch
+from cpython cimport PyErr_Occurred
+from cpython cimport PyObject
+from cpython cimport PyErr_Clear
 
 cdef extern from "Python.h":
     int    Py_ReprEnter(object)
     void   Py_ReprLeave(object)
+
+    int PyException_SetTraceback(PyObject* ex, PyObject* tb) except *
 
 import sys
 import os
@@ -194,10 +203,9 @@ cpdef _flags_to_list(unsigned int flags):
     return result
 
 
-if sys.version_info[0] >= 3:
-    basestring = (bytes, str)
-else:
-    basestring = __builtins__.basestring
+
+basestring = (bytes, str)
+
 
 
 cpdef unsigned int _flags_to_int(object flags) except? -1:
@@ -478,19 +486,29 @@ cdef public class loop [object PyGeventLoopObject, type PyGeventLoop_Type]:
         self.starting_timer_may_update_loop_time = True
         cdef libev.ev_tstamp now = libev.ev_now(self._ptr)
         cdef libev.ev_tstamp expiration = now + <libev.ev_tstamp>getswitchinterval()
-
+        cdef object cb_callable # for printing later
+        assert not PyErr_Occurred()
         try:
             libev.ev_timer_stop(self._ptr, &self._timer0)
             while self._callbacks.head is not None:
                 cb = self._callbacks.popleft()
-
                 libev.ev_unref(self._ptr)
                 # On entry, this will set cb.callback to None,
                 # changing cb.pending from True to False; on exit,
                 # this will set cb.args to None, changing bool(cb)
                 # from True to False.
                 # XXX: Why is this a C callback, not cython?
+                cb_callable = cb.callback
                 gevent_call(self, cb)
+                if PyErr_Occurred():
+                    # Exceptions should not escape gevent_call,
+                    # but just in case...
+                    # note we don't use gevent_handle_error here, between
+                    # running callbacks is a fairly fragile state and
+                    # that directs back up to the hub and user code.
+                    PyErr_WriteUnraisable(cb_callable)
+                    PyErr_Clear()
+                cb_callable = None
                 count -= 1
 
                 if count == 0 and self._callbacks.head is not None:
@@ -1336,7 +1354,7 @@ cdef public class stat(watcher) [object PyGeventStatObject, type PyGeventStat_Ty
 cdef object SYSERR_CALLBACK = None
 
 
-cdef void _syserr_cb(char* msg) with gil:
+cdef void _syserr_cb(char* msg) noexcept with gil:
     try:
         SYSERR_CALLBACK(msg, errno)
     except:
@@ -1372,8 +1390,7 @@ EV_USE_4HEAP = libev.EV_USE_4HEAP
 
 # Things used in callbacks.c
 
-from cpython cimport PyErr_Fetch
-from cpython cimport PyObject
+from traceback import print_exception
 
 cdef public void gevent_handle_error(loop loop, object context):
     cdef PyObject* typep
@@ -1387,12 +1404,15 @@ cdef public void gevent_handle_error(loop loop, object context):
     # If it was set, this will clear it, and we will own
     # the references.
     PyErr_Fetch(&typep, &valuep, &tracebackp)
-    # TODO: Should we call PyErr_Normalize? There's code in
-    # Hub.handle_error that works around what looks like an
-    # unnormalized exception.
-
     if not typep:
         return
+
+    PyErr_NormalizeException(&typep, &valuep, &tracebackp)
+
+
+    if tracebackp:
+        PyException_SetTraceback(valuep, tracebackp)
+
     # This assignment will do a Py_INCREF
     # on the value. We already own the reference
     # returned from PyErr_Fetch,
@@ -1407,10 +1427,26 @@ cdef public void gevent_handle_error(loop loop, object context):
         traceback = <object>tracebackp
         Py_DECREF(traceback)
 
-    # If this method fails by raising an exception,
-    # cython will print it for us because we don't return a
-    # Python object and we don't declare an `except` clause.
-    loop.handle_error(context, type, value, traceback)
+
+    # Prior to Cython 3.<something>, we relied on Cython printing an
+    # uncaught exception here (because we don't return a Python object, and
+    # we have no except clause). It seems that as-of 3.0b3 at least,
+    # that no longer happens by default; if we want un caught, unraisable exception to be
+    # reported, we need to do so ourself.
+    try:
+        loop.handle_error(context, type, value, traceback)
+    except:
+        # In an except: block, PyErr_Occurred() is actually false.
+        # Cython has captured the exception and moved it around. The
+        # exc_info is available at the python level, but
+        # the C level APIs aren't going to work. In debug builds,
+        # PyErr_WriteUnraisable will crash with an assertion.
+        #
+        # It would be nice to call ``sys.unraisablehook``, but the default
+        # implementation of that requires that the argument be of
+        # a specific private type we cannot construct.
+        print_exception(*sys.exc_info())
+
 
 cdef public tuple _empty_tuple = ()
 
