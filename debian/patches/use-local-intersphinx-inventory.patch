@@ -12,8 +12,8 @@ Last-Update: 2015-01-05
  ]
  
  intersphinx_mapping = {
--    'http://docs.python.org/': None,
-+    'http://docs.python.org/': '../debian/python.inv',
-     'https://greenlet.readthedocs.io/en/latest/': None,
-     'https://zopeevent.readthedocs.io/en/latest/': None,
-     'https://zopecomponent.readthedocs.io/en/latest/': None,
+-    'python': ('https://docs.python.org/', None),
++    'python': ('https://docs.python.org/', '../debian/python.inv'),
+     'greenlet': ('https://greenlet.readthedocs.io/en/latest/', None),
+     'zopeevent': ('https://zopeevent.readthedocs.io/en/latest/', None),
+     'zopecomponent': ('https://zopecomponent.readthedocs.io/en/latest/', None),

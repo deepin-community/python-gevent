@@ -68,6 +68,7 @@ PY38 = None
 PY39 = None
 PY310 = None
 PY311 = None
+PY312 = None
 
 NON_APPLICABLE_SUFFIXES = ()
 if sys.version_info[0] == 3:
@@ -89,6 +90,8 @@ if sys.version_info[0] == 3:
         PY310 = True
     if sys.version_info[1] >= 11:
         PY311 = True
+    if sys.version_info[1] >= 12:
+        PY312 = True
 
 elif sys.version_info[0] == 2:
     # Any python 2
@@ -129,7 +132,7 @@ RUNNING_ON_CI = RUNNING_ON_TRAVIS or RUNNING_ON_APPVEYOR
 RUNNING_ON_MANYLINUX = os.environ.get('GEVENT_MANYLINUX')
 # I'm not sure how to reliably auto-detect this, without
 # importing platform, something we don't want to do.
-RUNNING_ON_MUSLLINUX = os.environ.get('GEVENT_MANYLINUX_NAME') == 'musllinux'
+RUNNING_ON_MUSLLINUX = 'musllinux' in os.environ.get('GEVENT_MANYLINUX_NAME', '')
 
 if RUNNING_ON_APPVEYOR:
     # We can't exec corecext on appveyor if we haven't run setup.py in
@@ -209,9 +212,9 @@ def libev_supports_linux_iouring():
 
 def resolver_dnspython_available():
     # Try hard not to leave around junk we don't have to.
-    import pkg_resources
+    from importlib import metadata
     try:
-        pkg_resources.get_distribution('dnspython')
-    except pkg_resources.DistributionNotFound:
+        metadata.distribution('dnspython')
+    except metadata.PackageNotFoundError:
         return False
     return True

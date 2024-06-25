@@ -2,7 +2,6 @@ Source: python-gevent
 Priority: optional
 Maintainer: Debian Python Team <team+python@tracker.debian.org>
 Uploaders: Laszlo Boszormenyi (GCS) <gcs@debian.org>,
-           Sandro Tosi <morph@debian.org>,
 Build-Depends: cython3,
                debhelper-compat (= 13),
                dh-exec,
@@ -21,6 +20,7 @@ Build-Depends: cython3,
                python3-setuptools,
                python3-sphinx,
                python3-sphinxcontrib.programoutput,
+               furo,
                python3-zope.event <!nocheck>,
 Standards-Version: 4.6.1
 Section: python

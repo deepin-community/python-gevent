@@ -35,19 +35,26 @@ export CCACHE_DIR="/ccache"
 # Note that changing the value of these variables invalidates configure caches
 
 GEVENT_WARNFLAGS="-Wno-strict-aliasing -Wno-comment -Wno-unused-value -Wno-unused-but-set-variable -Wno-sign-compare -Wno-parentheses -Wno-unused-function -Wno-tautological-compare -Wno-strict-prototypes -Wno-return-type -Wno-misleading-indentation"
-OPTIMIZATION_FLAGS="-pipe"
-if [ "$DOCKER_IMAGE" == "quay.io/pypa/manylinux2014_aarch64" -a -n "$GITHUB_ACTIONS" ] || [ "$DOCKER_IMAGE" == "quay.io/pypa/manylinux2014_ppc64le" -a -n "$GITHUB_ACTIONS" ] ; then
-    # Compiling with -Ofast is a no-go because of the regression it causes (#1864).
-    # The default settings have -O3, and adding -Os doesn't help much. So maybe -O1 will.
-    echo "Compiling with -O1"
-    OPTIMIZATION_FLAGS="-pipe -O1"
-    SLOW_BUILD=1
-    GEVENTTEST_SKIP_ALL=1
-    export GEVENTSETUP_DISABLE_ARES=1
+OPTIMIZATION_FLAGS="-O3 -pipe"
+if [ -n "$GITHUB_ACTIONS" ]; then
+    if [ "$DOCKER_IMAGE" == "quay.io/pypa/manylinux2014_aarch64" ] || [ "$DOCKER_IMAGE" == "quay.io/pypa/manylinux2014_ppc64le" ] || [ "$DOCKER_IMAGE" == "quay.io/pypa/manylinux2014_s390x" ] ||  [ "$DOCKER_IMAGE" == "quay.io/pypa/musllinux_1_1_aarch64" ] ; then
+        # Compiling with -Ofast is a no-go because of the regression it causes (#1864).
+        # The default settings have -O3, and adding -Os doesn't help much. So maybe -O1 will.
+        echo "Compiling with -O1"
+        OPTIMIZATION_FLAGS="-pipe -O1"
+        SLOW_BUILD=1
+        GEVENTTEST_SKIP_ALL=1
+        export GEVENTSETUP_DISABLE_ARES=1
+        # ccache has been seen to have some issues here with too many open files?
+        unset CC
+        unset LDSHARED
+        unset LDCCSHARED
+        unset LDCXXSHARED
+    fi
 else
-    echo "Compiling with -O3"
     OPTIMIZATION_FLAGS="-pipe -O3"
 fi
+echo "Compiling with $OPTIMIZATION_FLAGS"
 export CFLAGS="$OPTIMIZATION_FLAGS $GEVENT_WARNFLAGS"
 # -lrt: Needed for clock_gettime libc support on this version.
 # -pthread: Needed for pthread_atfork (cffi).
@@ -61,6 +68,8 @@ export LDFLAGS="$LIBS"
 # a fallback loop.
 export GEVENT_LOOP="libev-cext"
 
+SEP="~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
 if [ -d /gevent -a -d /opt/python ]; then
     # Running inside docker
     # Set a cache directory for pip. This was
@@ -73,13 +82,16 @@ if [ -d /gevent -a -d /opt/python ]; then
     # pip to disable the cache when it detects that the owner doesn't match.
     # The below is an attempt to fix that, taken frob bcrypt. It seems to work on
     # Github Actions.
+    echo $SEP
     if [ -n "$GITHUB_ACTIONS" ]; then
-        echo Adjusting pip cache permissions
+        echo Adjusting pip cache permissions: $(whoami)
         mkdir -p $XDG_CACHE_HOME/pip
         chown -R $(whoami) $XDG_CACHE_HOME
     fi
     ls -ld /cache
     ls -ld /cache/pip
+    echo $SEP
+    echo "Installing Build Deps"
     if [ -e /usr/bin/yum ]; then
         yum -y install libffi-devel
         # Some images/archs (specificaly 2014_aarch64) don't have ccache;
@@ -88,7 +100,7 @@ if [ -d /gevent -a -d /opt/python ]; then
         if [ -n "$SLOW_BUILD" ] ; then
             # This provides access to ccache for the 2014 image
             echo Installing epel
-            rpm -Uvh https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm
+            rpm -Uvh https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm || true
         fi
         yum -y install ccache || export CC=gcc LDSHARED="gcc -shared" LDCXXSHARED="gcc -shared"
         # On Fedora Rawhide (F33)
@@ -98,9 +110,12 @@ if [ -d /gevent -a -d /opt/python ]; then
         # the muslinux image
         apk add --no-cache build-base libffi-dev ccache
     fi
+    echo $SEP
 
-    echo Current environment
+    echo  Current environment
+    echo $SEP
     env | sort
+    echo $SEP
 
     mkdir /tmp/build
     cd /tmp/build
@@ -112,12 +127,44 @@ if [ -d /gevent -a -d /opt/python ]; then
     else
         echo Not configuring c-ares because it is disabled
     fi
+    echo $SEP
     rm -rf /gevent/wheelhouse
     mkdir /gevent/wheelhouse
     OPATH="$PATH"
     which auditwheel
-    for variant in `ls -d /opt/python/cp{310,27,36,37,38,39,311}*`; do
+    # June 2023: 3.8, 3.9, and 3.10 are in security-fix only mode, ending support in
+    # 2024, 2025, and 2026, respectively. Only 3.11+ are in active support mode.
+    # Building a variant in emulation takes at least 9 minutes on Github Actions,
+    # plus many minutes to build the deps (Cython) and then many more minutes to build and
+    # install test dependencies; a complete build for ppc64le with 3.8, 9, 10, 11, and 12
+    # took 1.5 hours. Multiply that times all the SLOW_BUILD images, and you've got a lot of time.
+    #
+    # So, for SLOW_BUILD environments:
+    # - skip security-fix only versions; users still on those versions are the least likely to
+    #   upgrade dependencies
+    # - skip running most tests and installing test extras (which we don't need because we only run
+    #   a tiny subset of tests)
+    echo Possible Builds
+    ls -l /opt/python/
+
+    # If there is no Cython binary wheel available, don't try to build one; it takes
+    # forever! The old way of --install-option="--no-cython-compile" doesn't work because
+    # pip dropped support for it, and the "supported" way, --config-settings='--install-option="--no-cython-compile"'
+    # also doesn't work. Fortunately, Cython also reads an environment variable.
+    export NO_CYTHON_COMPILE=true
+
+    # Start echoing commands (doing it earlier is too much)
+    set -x
+    for variant in /opt/python/cp{312,38,39,310,311}*; do
+        echo $SEP
         export PATH="$variant/bin:$OPATH"
+        if [ -n "$SLOW_BUILD" ]; then
+            is_security_fix_only=$(python -c 'import sys; print(sys.version_info[:2] < (3, 10))')
+            if [ "$is_security_fix_only" == "True" ]; then
+                echo "Skipping build of $variant"
+                continue
+            fi
+        fi
         echo "Building $variant $(python --version)"
 
         python -mpip install -U pip
@@ -125,13 +172,17 @@ if [ -d /gevent -a -d /opt/python ]; then
         # The downside is that we must install dependencies manually.
         # NOTE: We can't upgrade ``wheel`` because ``auditwheel`` depends on
         # it, and auditwheel is installed in one of these environments.
-        python -mpip install -U "cython >= 3.0a6" cffi 'greenlet >= 2.0.0' setuptools
+        time python -m pip install  -U 'cython>=3.0'
+        time python -mpip install -U cffi 'greenlet >= 2.0.0; python_version < "3.12"' 'greenlet >= 3.0a1; python_version >= "3.12"' setuptools
+        echo "$variant: Building wheel"
         time (python setup.py bdist_wheel)
         PATH="$OPATH" auditwheel repair dist/gevent*.whl
         cp wheelhouse/gevent*.whl /gevent/wheelhouse
-
-        python -mpip install -U --no-compile `ls dist/gevent*whl`[test]
-        echo 'Installation details'
+        # Install it and its deps to be sure that it can be done; no sense
+        # trying to publish a wheel that can't be installed.
+        time python -mpip install -U --no-compile $(ls dist/gevent*whl)
+        # Basic sanity checks
+        echo "$variant: Installation details"
         python -c 'from __future__ import print_function; import gevent; print(gevent, gevent.__version__)'
         python -c 'from __future__ import print_function; from gevent._compat import get_clock_info; print("clock info", get_clock_info("perf_counter"))'
         python -c 'from __future__ import print_function; import greenlet; print(greenlet, greenlet.__version__)'
@@ -144,6 +195,8 @@ if [ -d /gevent -a -d /opt/python ]; then
         fi
 
         if [ -z "$GEVENTTEST_SKIP_ALL" ]; then
+            # With the test extra
+            time python -mpip install -U --no-compile $(ls dist/gevent*whl)[test]
             python -mgevent.tests --second-chance
         else
             # Allow skipping the bulk of the tests. If we're emulating Arm,
@@ -162,15 +215,17 @@ fi
 # Mount the current directory as /gevent
 # Mount the pip cache directory as /cache
 # `pip cache` requires pip 20.1
+echo $SEP
 echo Setting up caching
 python --version
 python -mpip --version
 LCACHE="$(dirname `python -mpip cache dir`)"
 echo Sharing pip cache at $LCACHE $(ls -ld $LCACHE)
 echo Sharing ccache dir at $HOME/.ccache
-if [ ! -d $HOME/.ccache ]; then
-    mkdir $HOME/.ccache
+if [ ! -d "$HOME/.ccache" ]; then
+    mkdir "$HOME/.ccache"
 fi
+echo $SEP
 # Travis CI and locally we want `-ti`, but github actions doesn't have a TTY, so one
 # or the other of the arguments causes this to fail with 'input device is not a TTY'
 # Pas through whether we're running on github or not to help with caching.
