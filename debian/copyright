@@ -35,12 +35,6 @@ Copyright:
  Copyright (C) 2021      Sandro Tosi <morph@debian.org>
 License: GPL-3
 
-Files: gevent/core.*
-Copyright:
- Copyright (c) 2004 Dug Song <dugsong@monkey.org>
- Copyright (c) 2003 Martin Murray <murrayma@citi.umich.edu>
-License: BSD-3-Clause
-
 License: BSD-3-Clause
  All rights reserved, all wrongs reversed.
  .
@@ -68,19 +62,22 @@ License: BSD-3-Clause
  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Files: gevent/pywsgi.py gevent/backdoor.py gevent/socket.py gevent/sslold.py
+Files:
+ src/gevent/pywsgi.py
+ src/gevent/backdoor.py
+ src/gevent/socket.py
 Copyright:
  Copyright (c) 2005-2006, Bob Ippolito <bob@redivi.com>
  Copyright (c) 2007, Linden Lab
  Copyright (c) 2008, Donovan Preston
 License: MIT
 
-Files: gevent/win32util.py
+Files: src/gevent/win32util.py
 Copyright:
  Copyright (c) 2001-2007 Twisted Matrix Laboratories
 License: MIT
 
-Files: gevent/ssl.py
+Files: src/gevent/ssl.py
 Copyright:
  Copyright (c) 2009 Python SSL <python.ssl.maintainer@gmail.com>
 License: PSFL
@@ -89,19 +86,20 @@ Comment: license full text at /usr/share/doc/python/copyright
 Files: examples/webchat/static
 Copyright:
  Copyright (c) 2009 FriendFeed
-License: Apachae-2.0
-
-Files: deps/c-ares/Makefile.dj
-Copyright: Gisle Vanem <gvanem@yahoo.no> 2004 - 2020
+License: Apache-2.0
 
 Files: deps/c-ares/src/lib/ares_parse_caa_reply.c 
 Copyright: 2020 by <danny.sonnenschein@platynum.ch>
 License: MIT
 
-Files: deps/libev/
+Files: deps/libev/*
 Copyright: Copyright (c) 2007-2020 Marc Alexander Lehmann <libev@schmorp.de>
 License: BSD-2-Clause or GPL-2+
 
-Files: deps/libuv/
+Files: deps/libuv/*
 Copyright: libuv project contributors
 License: MIT
+
+License: Apache-2.0
+ On Debian systems, the complete text of the Apache License version 2
+ can be found in /usr/share/common-licenses/Apache-2.0

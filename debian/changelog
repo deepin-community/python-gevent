@@ -1,3 +1,23 @@
+python-gevent (24.11.1-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release. (Closes: #1089678)
+  * debian/rules: Revert workaround for gcc-14, now fixed upstream.
+  * debian/rules: Use "dh_missing --fail-missing".
+  * debian/python.inv: Updated to python 3.13.
+  * debian/copyright: Minor updates to the copyright info (lintian).
+  * debian/python3-gevents.install: Also install gevent/monkey/*.py.
+
+ -- Boyuan Yang <byang@debian.org>  Sat, 14 Dec 2024 15:37:17 -0500
+
+python-gevent (24.2.1-1) unstable; urgency=medium
+
+  * Team upload.
+  * Switch to python3-full as a build dependency
+  * Add workaround for gcc-14 (Closes: #1075415)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Fri, 12 Jul 2024 14:51:06 +0200
+
 python-gevent (24.2.1-0.1) unstable; urgency=medium
 
   * Non-maintainer upload.

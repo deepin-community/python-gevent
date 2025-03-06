@@ -91,6 +91,12 @@ if [ -d /gevent -a -d /opt/python ]; then
     ls -ld /cache
     ls -ld /cache/pip
     echo $SEP
+
+    # Ahh, overprotective security. Disable it.
+    echo "Fixing get's paranoia"
+    git config --global --add safe.directory /gevent/.git
+    echo $SEP
+
     echo "Installing Build Deps"
     if [ -e /usr/bin/yum ]; then
         yum -y install libffi-devel
@@ -155,8 +161,14 @@ if [ -d /gevent -a -d /opt/python ]; then
 
     # Start echoing commands (doing it earlier is too much)
     set -x
-    for variant in /opt/python/cp{312,38,39,310,311}*; do
+    for variant in /opt/python/cp{313,312,39,310,311}*; do
         echo $SEP
+        if [ "$variant" = "/opt/python/cp313-cp313t" ]; then
+            # It appears that Cython 3.0.11 cannot produce code that
+            # works here. Lots of compiler errors.
+            echo "Unable to build without gil"
+            continue
+        fi
         export PATH="$variant/bin:$OPATH"
         if [ -n "$SLOW_BUILD" ]; then
             is_security_fix_only=$(python -c 'import sys; print(sys.version_info[:2] < (3, 10))')

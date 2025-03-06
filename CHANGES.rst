@@ -6,6 +6,96 @@
 
 .. towncrier release notes start
 
+24.11.1 (2024-11-11)
+====================
+
+
+Bugfixes
+--------
+
+- Remove some legacy code that supported Python 2 for compatibility with
+  the upcoming releases of Cython 3.1.
+
+  Also, the ``PeriodicMonitorThreadStartedEvent`` now properly
+  implements the ``IPeriodicMonitorThreadStartedEvent`` interface.
+  The ``EventLoopBlocked`` event includes the hub which was blocked,
+  and it is notified before the report is printed so that event
+  listeners can modify the report.
+  See :issue:`2076`.
+
+
+24.10.3 (2024-10-18)
+====================
+
+
+Bugfixes
+--------
+
+- Fix clearing stack frames on Python 3.13. This is invoked when you
+  fork after having used the thread pool.
+  See :issue:`2067`.
+- Distribute manylinux2014 wheels for x86_64.
+  See :issue:`2068`.
+- Stop switching to the hub in the after fork hook in a child process. This could lead to strange behaviour, and is different than what all other versions of Python do.
+
+
+
+24.10.2 (2024-10-11)
+====================
+
+
+Bugfixes
+--------
+
+- Workaround a Cython bug compiling on GCC14.
+  See :issue:`2049`.
+
+
+24.10.1 (2024-10-09)
+====================
+
+
+Features
+--------
+
+- Update the bundled c-ares to 1.33.1.
+
+- Add support for Python 3.13.
+
+  - The functions and classes in ``gevent.subprocess`` no longer accept
+    ``stdout=STDOUT`` and raise a ``ValueError``.
+
+  Several additions and changes to the ``queue`` module, including:
+
+  - ``Queue.shutdown`` is available on all versions of Python.
+  - ``LifoQueue`` is now a joinable queue.
+
+- gevent.monkey changed from a module to a package. The public API
+  remains the same.
+
+  For this release, private APIs (undocumented, marked internal, or
+  beginning with an underscore) are also preserved. However, these may
+  be changed or removed at any time in the future. If you are using one
+  of these APIs and cannot replace it, please contact the gevent team.
+
+
+
+Bugfixes
+--------
+
+- For platforms that don't have ``socketpair``, upgrade our fallback
+  code to avoid a security issue.
+  See :issue:`2048`.
+
+
+Deprecations and Removals
+-------------------------
+
+- Remove support for Python 3.8, which has reached the end of its
+  support lifecycle.
+  See :issue:`remove_py38`.
+
+
 24.2.1 (2024-02-14)
 ===================
 
