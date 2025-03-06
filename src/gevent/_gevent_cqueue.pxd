@@ -40,6 +40,7 @@ cdef class Queue:
     cdef __weakref__
     cdef readonly hub
     cdef readonly queue
+    cdef readonly bint is_shutdown
 
     cdef getters
     cdef putters
@@ -65,8 +66,11 @@ cdef class Queue:
     cpdef get_nowait(self)
     cpdef peek(self, block=*, timeout=*)
     cpdef peek_nowait(self)
+    cpdef shutdown(self, immediate=*)
 
     cdef _schedule_unlock(self)
+    cdef _drain_for_immediate_shutdown(self)
+
 
 @cython.final
 @cython.internal
@@ -74,21 +78,28 @@ cdef class ItemWaiter(Waiter):
     cdef readonly item
     cdef readonly Queue queue
 
-
-@cython.final
+###
+# XXX: Disabling Cython.final here pending a release > Cython 3.0.11
+# because it breaks on GCC. See https://github.com/gevent/gevent/issues/2049#issuecomment-2404700280
+# Restore when new cython is released.
+#
+# @cython.final
+###
 cdef class UnboundQueue(Queue):
     pass
 
 cdef class PriorityQueue(Queue):
     pass
 
-cdef class LifoQueue(Queue):
-    pass
 
 cdef class JoinableQueue(Queue):
     cdef Event _cond
     cdef readonly int unfinished_tasks
+    cdef _did_put_task(self)
 
+
+cdef class LifoQueue(JoinableQueue):
+    pass
 
 cdef class Channel:
     cdef __weakref__

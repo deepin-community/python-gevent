@@ -5,6 +5,7 @@ usr/lib/python3*/*-packages/gevent/_ffi/*.py
 usr/lib/python3*/*-packages/gevent/libev/*.py
 usr/lib/python3*/*-packages/gevent/libev/*.cpython-3*[0-9m]-${DEB_HOST_MULTIARCH}.so
 usr/lib/python3*/*-packages/gevent/libuv/*.py
+usr/lib/python3*/*-packages/gevent/monkey/*.py
 usr/lib/python3*/*-packages/gevent/resolver/*.py
 usr/lib/python3*/*-packages/gevent/resolver/*.cpython-3*[0-9m]-${DEB_HOST_MULTIARCH}.so
 usr/lib/python3*/*-packages/*.egg-info

@@ -82,7 +82,7 @@ override_dh_installexamples-indep:
 		$(DOCDIR)/examples/webchat/templates/index.html
 
 override_dh_missing:
-	dh_missing --list-missing -X.c -X.h -X.pxd -X.pyc -X.pyx
+	dh_missing --fail-missing -X.c -X.h -X.pxd -X.pyc -X.pyx
 
 .PHONY: override_dh_auto_build override_dh_auto_clean override_dh_install \
 	override_dh_compress override_dh_strip override_dh_auto_test \

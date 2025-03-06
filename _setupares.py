@@ -42,7 +42,7 @@ cflags = ('CFLAGS="%s"' % (cflags,)) if cflags else ''
 ares_configure_command = ' '.join([
     "(cd ", quoted_dep_abspath('c-ares'),
     " && if [ -r include/ares_build.h ]; then cp include/ares_build.h include/ares_build.h.orig; fi ",
-    " && sh ./configure --disable-dependency-tracking -C " + cflags,
+    " && sh ./configure --disable-dependency-tracking --disable-tests -C " + cflags,
     " && cp src/lib/ares_config.h include/ares_build.h \"$OLDPWD\" ",
     " && cat include/ares_build.h ",
     " && if [ -r include/ares_build.h.orig ]; then mv include/ares_build.h.orig include/ares_build.h; fi)",
@@ -108,6 +108,12 @@ ARES.optional = not ares_required
 
 if CARES_EMBED:
     ARES.sources += glob_many('deps/c-ares/src/lib/*.c')
+    ARES.sources += glob_many('deps/c-ares/src/lib/dsa/*.c')
+    ARES.sources += glob_many('deps/c-ares/src/lib/str/*.c')
+    ARES.sources += glob_many('deps/c-ares/src/lib/record/*.c')
+    ARES.sources += glob_many('deps/c-ares/src/lib/util/*.c')
+    ARES.sources += glob_many('deps/c-ares/src/lib/event/*.c')
+    ARES.sources += glob_many('deps/c-ares/src/lib/legacy/*.c')
     ARES.configure = configure_ares
     if WIN:
         ARES.libraries += ['advapi32']
