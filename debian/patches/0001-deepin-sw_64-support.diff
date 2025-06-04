@@ -1,0 +1,38 @@
+diff --git a/deps/libev/ev.c b/deps/libev/ev.c
+index ec212a1..1021706 100644
+--- a/deps/libev/ev.c
++++ b/deps/libev/ev.c
+@@ -498,6 +498,11 @@
+ #  define SYS_io_uring_enter     426
+ #  define SYS_io_uring_wregister 427
+ # endif
++# if !SYS_io_uring_setup && __linux && __sw_64__
++#  define SYS_io_uring_setup     272
++#  define SYS_io_uring_enter     273
++#  define SYS_io_uring_wregister 273
++# endif
+ # if SYS_io_uring_setup && EV_USE_EPOLL /* iouring backend requires epoll backend */
+ #  define EV_NEED_SYSCALL 1
+ # else
+diff --git a/deps/libuv/src/unix/linux-syscalls.c b/deps/libuv/src/unix/linux-syscalls.c
+index 5071cd5..ee4236a 100644
+--- a/deps/libuv/src/unix/linux-syscalls.c
++++ b/deps/libuv/src/unix/linux-syscalls.c
+@@ -105,6 +105,8 @@
+ #  define __NR_copy_file_range 379
+ # elif defined(__arc__)
+ #  define __NR_copy_file_range 285
++# elif defined(__sw_64__)
++#  define __NR_copy_file_range 515
+ # endif
+ #endif /* __NR_copy_file_range */
+ 
+@@ -121,6 +123,8 @@
+ #  define __NR_statx 383
+ # elif defined(__s390__)
+ #  define __NR_statx 379
++# elif defined(__sw_64__)
++#  define __NR_statx 518
+ # endif
+ #endif /* __NR_statx */
+ 
